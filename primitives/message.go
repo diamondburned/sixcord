@@ -14,6 +14,12 @@ type Message struct {
 	*discordgo.Message
 	x, y, width, height int
 
+	visible bool
+	focus   tview.Focusable
+
+	// PtrY is used to calculate the total height in the future
+	PtrY int
+
 	// attachments contains the string, which is the URL,
 	// and its corresponding image
 	attachments []image.Image
@@ -22,9 +28,12 @@ type Message struct {
 // NewMessage creates a new message
 func NewMessage(m *discordgo.Message) (*Message, error) {
 	message := &Message{
+		visible:     true,
 		Message:     m,
 		attachments: make([]image.Image, 0, len(m.Attachments)),
 	}
+
+	message.focus = message
 
 	for _, a := range m.Attachments {
 		// an image doesn't have 0 for either of these
@@ -68,7 +77,7 @@ func (m *Message) Draw(s tcell.Screen) bool {
 
 	// ptr(X|Y) is used to coordinate where the attachments
 	// are drawn. +1 is to space out a line
-	ptrX, ptrY := m.x, m.y+len(lines)+1
+	m.PtrY = m.y + len(lines) + 1
 
 	for _, a := range m.attachments {
 		p, err := tviewsixel.NewPicture(a)
@@ -79,7 +88,7 @@ func (m *Message) Draw(s tcell.Screen) bool {
 
 		// We give the Picture a line limit of 10 to prevent
 		// images that are too tall or too large.
-		p.SetRect(ptrX, ptrY, m.width, 10)
+		p.SetRect(m.x, m.PtrY, m.width, 15)
 
 		// Draw the image into the screen
 		p.Draw(s)
@@ -90,8 +99,55 @@ func (m *Message) Draw(s tcell.Screen) bool {
 		// Add to ptrY the lines that the image drawn took, by
 		// dividing the height in pixels with the height of one
 		// cell. 1 is added as a margin/padding of some sort.
-		ptrY += imgH/p.CharH + 1
+		m.PtrY += imgH/p.CharH + 1
 	}
 
 	return true
 }
+
+// SetVisible sets visibility like CSS.
+func (m *Message) SetVisible(v bool) {
+	m.visible = v
+}
+
+// IsVisible returns visible
+func (m *Message) IsVisible() bool {
+	return m.visible
+}
+
+// GetRect returns the rectangle dimensions
+func (m *Message) GetRect() (int, int, int, int) {
+	return m.x, m.y, m.width, m.height
+}
+
+// SetRect sets the rectangle dimensions
+func (m *Message) SetRect(x, y, width, height int) {
+	m.x = x
+	m.y = y
+	m.width = width
+	m.height = height
+}
+
+// InputHandler sets no input handler, satisfying Primitive
+func (m *Message) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.Primitive)) {
+	return nil
+}
+
+// Focus does nothing, really.
+func (*Message) Focus(delegate func(tview.Primitive)) {}
+
+// Blur also does nothing.
+func (*Message) Blur() {}
+
+// HasFocus always returns false, as you can't focus on this.
+func (*Message) HasFocus() bool {
+	return false
+}
+
+// GetFocusable does whatever the fuck I have no idea
+func (m *Message) GetFocusable() tview.Focusable {
+	return m.focus
+}
+
+func (m *Message) SetOnFocus(func()) {}
+func (m *Message) SetOnBlur(func())  {}

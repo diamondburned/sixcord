@@ -3,7 +3,9 @@ package primitives
 import (
 	"testing"
 
+	"github.com/Bios-Marcel/tview"
 	"github.com/bwmarrin/discordgo"
+	"github.com/gdamore/tcell"
 )
 
 func TestMessage(t *testing.T) {
@@ -30,9 +32,19 @@ func TestMessage(t *testing.T) {
 		},
 	}
 
-	_, err := NewMessage(m)
+	mv, err := NewMessage(m)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	app := tview.NewApplication()
+	app.SetBeforeDrawFunc(func(s tcell.Screen) bool {
+		s.Clear()
+		return false
+	})
+
+	if err := app.SetRoot(mv, true).Run(); err != nil {
+		panic(err)
 	}
 
 	// TODO: complete the Primitive so it can be drawn
