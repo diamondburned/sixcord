@@ -79,6 +79,8 @@ func (m *Message) Draw(s tcell.Screen) bool {
 	// are drawn. +1 is to space out a line
 	m.PtrY = m.y + len(lines) + 1
 
+	return true
+
 	for _, a := range m.attachments {
 		p, err := tviewsixel.NewPicture(a)
 		if err != nil {
@@ -88,7 +90,7 @@ func (m *Message) Draw(s tcell.Screen) bool {
 
 		// We give the Picture a line limit of 10 to prevent
 		// images that are too tall or too large.
-		p.SetRect(m.x, m.PtrY, m.width, 15)
+		p.SetRect(m.x, m.PtrY, m.width, 10)
 
 		// Draw the image into the screen
 		p.Draw(s)
@@ -99,7 +101,7 @@ func (m *Message) Draw(s tcell.Screen) bool {
 		// Add to ptrY the lines that the image drawn took, by
 		// dividing the height in pixels with the height of one
 		// cell. 1 is added as a margin/padding of some sort.
-		m.PtrY += imgH/p.CharH + 1
+		m.PtrY += imgH/tviewsixel.CharH + 1
 	}
 
 	return true

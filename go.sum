@@ -31,6 +31,12 @@ github.com/soniakeys/quant v1.0.0 h1:N1um9ktjbkZVcywBVAAYpZYSHxEfJGzshHCxx/DaI0Y
 github.com/soniakeys/quant v1.0.0/go.mod h1:HI1k023QuVbD4H8i9YdfZP2munIHU4QpjsImz6Y6zds=
 gitlab.com/diamondburned/tview-sixel v0.0.0-20190423074252-19feee0b3f0f h1:eZ9nzid1ikEmGP5jRNsHuT0MuLuZJlVS3tBkuWwRUs8=
 gitlab.com/diamondburned/tview-sixel v0.0.0-20190423074252-19feee0b3f0f/go.mod h1:CeouedWKvcmhvvwHpBC1RetWKY3HP7Gex/VnrbcHqe4=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423170400-188e1458be25 h1:F1EnU9nh6dtgiMNJDZ7MYoVDoDyuFRxDh0UU4JgO5NE=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423170400-188e1458be25/go.mod h1:CeouedWKvcmhvvwHpBC1RetWKY3HP7Gex/VnrbcHqe4=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423215758-975a8279ac8e h1:GMt/a/zbL+wY+ZeDPgsZXfvYOUWOP5GrVkIeUjFtM5A=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423215758-975a8279ac8e/go.mod h1:CeouedWKvcmhvvwHpBC1RetWKY3HP7Gex/VnrbcHqe4=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423220537-a2bc7e185c76 h1:2109Nges1tCG6GGisSsYV8gTv4Jf8c+rvFKpSaOsr+k=
+gitlab.com/diamondburned/tview-sixel v0.0.0-20190423220537-a2bc7e185c76/go.mod h1:CeouedWKvcmhvvwHpBC1RetWKY3HP7Gex/VnrbcHqe4=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 h1:y6ce7gCWtnH+m3dCjzQ1PCuwl28DDIc3VNnvY29DlIA=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

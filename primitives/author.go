@@ -4,12 +4,13 @@ import (
 	"errors"
 	"image"
 
+	"github.com/Bios-Marcel/tview"
 	"github.com/bwmarrin/discordgo"
+	"github.com/gdamore/tcell"
+	tviewsixel "gitlab.com/diamondburned/tview-sixel"
 )
 
-// avatarStore contains a map of images, which
-// corresponds to an user's ID
-var avatarStore map[string]image.Image
+const avatarSize = 48 // size of avatar in px
 
 var (
 	// ErrNoAuthor is returned when Author is nil
@@ -20,34 +21,33 @@ var (
 type Author struct {
 	*discordgo.User
 
-	firstChild *Message
-	children   []*Message
+	x, y, width, height int
+
+	visible bool
+	focus   tview.Focusable
+
+	// PtrY is used to calculate the total height in the future
+	PtrY int
+
+	avatar image.Image
+
+	children []*Message
 }
 
 // NewAuthor makes a new author primitive
-func NewAuthor(m *discordgo.Message) (*Author, error) {
-	if m.Author == nil {
+func NewAuthor(u *discordgo.User) (*Author, error) {
+	if u == nil {
 		return nil, ErrNoAuthor
 	}
 
-	mPrimitive, err := NewMessage(m)
-	if err != nil {
-		return nil, err
-	}
-
 	a := &Author{
-		User:       m.Author,
-		firstChild: mPrimitive,
-		children:   []*Message{mPrimitive},
+		User:     u,
+		children: []*Message{},
 	}
 
-	if _, ok := avatarStore[a.ID]; !ok {
-		i, err := DownloadImage(m.Author.AvatarURL("32"))
-		if err != nil {
-			return a, nil
-		}
-
-		avatarStore[a.ID] = i
+	i, err := DownloadImage(u.AvatarURL("64"))
+	if err == nil {
+		a.avatar = i
 	}
 
 	return a, nil
@@ -103,6 +103,97 @@ func (a *Author) EditMessage(m *discordgo.Message) (bool, error) {
 // drawn when Draw() is called.
 func (a *Author) ShouldRemove() bool {
 	return len(a.children) == 0
+}
+
+// Draw draws the author down
+func (a *Author) Draw(s tcell.Screen) bool {
+	if a.width <= 0 || a.height <= 0 {
+		return false
+	}
+
+	if a.ShouldRemove() {
+		return false
+	}
+
+	icellW := avatarSize / tviewsixel.CharW
+	icellH := avatarSize / tviewsixel.CharH
+
+	i, err := tviewsixel.NewPicture(a.avatar)
+	if err == nil {
+		i.SetRect(a.x, a.y, icellW, icellH)
+		i.Draw(s)
+	}
+
+	for i, r := range []rune(a.Username) {
+		s.SetContent(a.x+icellW+i+1, a.y, r, nil, 0)
+	}
+
+	a.PtrY = a.y + 1
+	x := a.x + icellW + 1
+
+	for _, m := range a.children {
+		m.SetRect(x, a.PtrY, a.width-icellW, a.height-a.PtrY)
+		m.Draw(s)
+
+		a.PtrY = m.PtrY
+
+		if a.PtrY > a.height {
+			break
+		}
+	}
+
+	return true
+}
+
+// SetVisible sets visibility like CSS.
+func (a *Author) SetVisible(v bool) {
+	a.visible = v
+}
+
+// IsVisible returns visible
+func (a *Author) IsVisible() bool {
+	return a.visible
+}
+
+// GetRect returns the rectangle dia.nsions
+func (a *Author) GetRect() (int, int, int, int) {
+	return a.x, a.y, a.width, a.height
+}
+
+// SetRect sets the rectangle dia.nsions
+func (a *Author) SetRect(x, y, width, height int) {
+	a.x = x
+	a.y = y
+	a.width = width
+	a.height = height
+}
+
+// InputHandler sets no input handler, satisfying Pria.tive
+func (a *Author) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.Primitive)) {
+	return nil
+}
+
+// Focus does nothing, really.
+func (*Author) Focus(delegate func(tview.Primitive)) {}
+
+// Blur also does nothing.
+func (*Author) Blur() {}
+
+// HasFocus always returns false, as you can't focus on this.
+func (*Author) HasFocus() bool {
+	return false
+}
+
+// GetFocusable does whatever the fuck I have no idea
+func (a *Author) GetFocusable() tview.Focusable {
+	return a.focus
+}
+
+func (a *Author) SetOnFocus(func()) {}
+func (a *Author) SetOnBlur(func())  {}
+
+func intDivCeil(i, j int) int {
+	return int((float64(i) + 0.5) / float64(j))
 }
 
 // from https://github.com/golang/go/wiki/SliceTricks, this function
